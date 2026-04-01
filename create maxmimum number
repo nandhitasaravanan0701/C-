@@ -1,0 +1,56 @@
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {
+        int m = nums1.size();
+        int n = nums2.size();
+        vector<int> maxResult;
+
+        
+        for (int i = max(0, k - n); i <= min(k, m); ++i) {
+            vector<int> sub1 = maxSubsequence(nums1, i);
+            vector<int> sub2 = maxSubsequence(nums2, k - i);
+            vector<int> merged = merge(sub1, sub2);
+            
+            if (maxResult.empty() || merged > maxResult) {
+                maxResult = merged;
+            }
+        }
+        return maxResult;
+    }
+
+private:
+    
+    vector<int> maxSubsequence(vector<int>& nums, int k) {
+        vector<int> res;
+        int drop = nums.size() - k; // Number of digits we can afford to remove
+        for (int num : nums) {
+            while (drop > 0 && !res.empty() && res.back() < num) {
+                res.pop_back();
+                drop--;
+            }
+            res.push_back(num);
+        }
+        res.resize(k);
+        return res;
+    }
+
+   
+    vector<int> merge(vector<int>& s1, vector<int>& s2) {
+        vector<int> res;
+        auto it1 = s1.begin(), it2 = s2.begin();
+        while (it1 != s1.end() || it2 != s2.end()) {
+            
+            if (lexicographical_compare(it1, s1.end(), it2, s2.end())) {
+                res.push_back(*it2++);
+            } else {
+                res.push_back(*it1++);
+            }
+        }
+        return res;
+    }
+};
