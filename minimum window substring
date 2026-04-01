@@ -1,0 +1,54 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <climits>
+
+using namespace std;
+
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        if (s.length() < t.length()) return "";
+
+        
+        int targetFreq[128] = {0};
+        int windowFreq[128] = {0};
+        for (char c : t) targetFreq[c]++;
+
+        int left = 0, right = 0;
+        int required = 0; 
+        int uniqueCharsInT = 0;
+        for (int i = 0; i < 128; i++) if (targetFreq[i] > 0) uniqueCharsInT++;
+
+        int minLen = INT_MAX;
+        int startIdx = -1;
+
+        while (right < s.length()) {
+            char c = s[right];
+            windowFreq[c]++;
+
+            
+            if (targetFreq[c] > 0 && windowFreq[c] == targetFreq[c]) {
+                required++;
+            }
+
+           
+            while (required == uniqueCharsInT) {
+                if (right - left + 1 < minLen) {
+                    minLen = right - left + 1;
+                    startIdx = left;
+                }
+
+                char leftChar = s[left];
+                if (targetFreq[leftChar] > 0 && windowFreq[leftChar] == targetFreq[leftChar]) {
+                    required--;
+                }
+                windowFreq[leftChar]--;
+                left++;
+            }
+            right++;
+        }
+
+        return startIdx == -1 ? "" : s.substr(startIdx, minLen);
+    }
+};
