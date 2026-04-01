@@ -1,0 +1,38 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+
+class Solution {
+    unordered_map<string, vector<string>> memo;
+
+public:
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> dict(wordDict.begin(), wordDict.end());
+        return backtrack(s, dict);
+    }
+
+    vector<string> backtrack(string s, unordered_set<string>& dict) {
+       
+        if (memo.count(s)) return memo[s];
+        if (s.empty()) return {""};
+
+        vector<string> results;
+
+        for (int i = 1; i <= s.length(); ++i) {
+            string word = s.substr(0, i);
+            
+            
+            if (dict.count(word)) {
+                vector<string> subResults = backtrack(s.substr(i), dict);
+                
+                for (string sub : subResults) {
+                    results.push_back(word + (sub.empty() ? "" : " ") + sub);
+                }
+            }
+        }
+
+        return memo[s] = results;
+    }
+};
