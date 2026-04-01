@@ -1,0 +1,35 @@
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int m = s.length();
+        int n = t.length();
+        
+        // Use unsigned long long for DP table to prevent overflow during intermediate steps, 
+        // though the final result is guaranteed to fit in a 32-bit int.
+        vector<vector<unsigned int>> dp(m + 1, vector<unsigned int>(n + 1, 0));
+        
+        // Base Case: An empty string t is a subsequence of any prefix of s exactly once
+        for (int i = 0; i <= m; i++) {
+            dp[i][0] = 1;
+        }
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                // Scenario 1: We don't use the current character s[i-1]
+                dp[i][j] = dp[i-1][j];
+                
+                // Scenario 2: If characters match, we can also use s[i-1]
+                if (s[i-1] == t[j-1]) {
+                    dp[i][j] += dp[i-1][j-1];
+                }
+            }
+        }
+        
+        return (int)dp[m][n];
+    }
+};
