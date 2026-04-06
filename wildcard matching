@@ -1,0 +1,42 @@
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int sIdx = 0, pIdx = 0;
+        int lastStarIdx = -1, sTmpIdx = -1;
+
+        while (sIdx < s.length()) {
+            // Case 1: Characters match or pattern has '?'
+            if (pIdx < p.length() && (p[pIdx] == '?' || p[pIdx] == s[sIdx])) {
+                sIdx++;
+                pIdx++;
+            }
+            // Case 2: Pattern has '*', record position and try matching 0 characters
+            else if (pIdx < p.length() && p[pIdx] == '*') {
+                lastStarIdx = pIdx;
+                sTmpIdx = sIdx;
+                pIdx++;
+            }
+            // Case 3: Mismatch, but a '*' was previously encountered
+            else if (lastStarIdx != -1) {
+                pIdx = lastStarIdx + 1; // Backtrack pattern to after the '*'
+                sTmpIdx++;              // Match one more character from 's' with the '*'
+                sIdx = sTmpIdx;
+            }
+            // Case 4: Mismatch and no '*' to fall back on
+            else {
+                return false;
+            }
+        }
+
+        // Check for remaining characters in pattern (only '*' can match empty string)
+        while (pIdx < p.length() && p[pIdx] == '*') {
+            pIdx++;
+        }
+
+        return pIdx == p.length();
+    }
+};
