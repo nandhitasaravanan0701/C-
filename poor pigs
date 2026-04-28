@@ -1,0 +1,24 @@
+#include <cmath>
+
+class Solution {
+public:
+    int poorPigs(int buckets, int minutesToDie, int minutesToTest) {
+        // Number of rounds we can conduct
+        int rounds = minutesToTest / minutesToDie;
+        
+        // Each pig has (rounds + 1) possible outcomes:
+        // Die in round 1, round 2, ..., round T, or survive all.
+        int states = rounds + 1;
+        
+        int pigs = 0;
+        long long maxBuckets = 1;
+        
+        // Find minimum pigs such that (states ^ pigs) >= buckets
+        while (maxBuckets < buckets) {
+            maxBuckets *= states;
+            pigs++;
+        }
+        
+        return pigs;
+    }
+};
