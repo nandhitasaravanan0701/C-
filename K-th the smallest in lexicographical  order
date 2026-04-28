@@ -1,0 +1,37 @@
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+public:
+    int findKthNumber(int n, int k) {
+        long curr = 1;
+        k--; // We start at 1, so we need to find k-1 more steps
+
+        while (k > 0) {
+            int steps = countSteps(n, curr, curr + 1);
+            if (steps <= k) {
+                // The target is not under this prefix, move to the next sibling
+                curr++;
+                k -= steps;
+            } else {
+                // The target is under this prefix, move down to the first child
+                curr *= 10;
+                k--;
+            }
+        }
+        return (int)curr;
+    }
+
+private:
+   
+    int countSteps(long n, long n1, long n2) {
+        int steps = 0;
+        while (n1 <= n) {
+            steps += min((long)n + 1, n2) - n1;
+            n1 *= 10;
+            n2 *= 10;
+        }
+        return steps;
+    }
+};
