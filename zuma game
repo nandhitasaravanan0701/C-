@@ -1,0 +1,72 @@
+
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    unordered_map<string, int> memo;
+
+    // Helper to reduce the board by removing groups of 3+
+    string reduce(string board) {
+        bool changed = true;
+        while (changed) {
+            changed = false;
+            for (int i = 0; i < (int)board.length(); ) {
+                int j = i;
+                while (j < board.length() && board[j] == board[i]) j++;
+                if (j - i >= 3) {
+                    board.erase(i, j - i);
+                    changed = true;
+                    break; 
+                } else {
+                    i = j;
+                }
+            }
+        }
+        return board;
+    }
+
+    int solve(string board, string hand) {
+        board = reduce(board);
+        if (board.empty()) return 0;
+        if (hand.empty()) return 6; // More than max hand size
+
+        string state = board + "#" + hand;
+        if (memo.count(state)) return memo[state];
+
+        int res = 6;
+        for (int i = 0; i <= board.length(); i++) {
+            for (int j = 0; j < hand.length(); j++) {
+                // Optimization: skip duplicate balls in hand
+                if (j > 0 && hand[j] == hand[j-1]) continue;
+
+                // Optimization: only insert if it matches the current or previous ball
+                // or if we are forced to (though standard Zuma strategy usually involves matching)
+                bool worthTrying = false;
+                if (i < board.length() && board[i] == hand[j]) worthTrying = true;
+                if (i > 0 && board[i-1] == hand[j]) worthTrying = true;
+
+                if (worthTrying) {
+                    string next_board = board;
+                    next_board.insert(i, 1, hand[j]);
+                    string next_hand = hand;
+                    next_hand.erase(j, 1);
+                    
+                    res = min(res, 1 + solve(next_board, next_hand));
+                }
+            }
+        }
+
+        return memo[state] = res;
+    }
+
+public:
+    int findMinStep(string board, string hand) {
+        sort(hand.begin(), hand.end());
+        int result = solve(board, hand);
+        return result > 5 ? -1 : result;
+    }
+};
