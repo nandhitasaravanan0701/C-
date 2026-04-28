@@ -1,0 +1,43 @@
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+class Solution {
+    unordered_set<string> wordSet;
+    unordered_map<string, bool> memo;
+
+    bool canForm(string word) {
+        if (memo.count(word)) return memo[word];
+        
+        for (int i = 1; i < word.length(); i++) {
+            string prefix = word.substr(0, i);
+            string suffix = word.substr(i);
+            
+            // If prefix is in set AND (suffix is in set OR suffix can be formed)
+            if (wordSet.count(prefix)) {
+                if (wordSet.count(suffix) || canForm(suffix)) {
+                    return memo[word] = true;
+                }
+            }
+        }
+        return memo[word] = false;
+    }
+
+public:
+    vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
+        wordSet = unordered_set<string>(words.begin(), words.end());
+        vector<string> result;
+        
+        for (const string& w : words) {
+            memo.clear(); // Clear memo for each new word check
+            if (canForm(w)) {
+                result.push_back(w);
+            }
+        }
+        
+        return result;
+    }
+};
