@@ -1,0 +1,69 @@
+#include <unordered_map>
+#include <list>
+#include <vector>
+
+using namespace std;
+
+class LFUCache {
+    struct Node {
+        int key, value, freq;
+    };
+
+    int cap;
+    int minFreq;
+    unordered_map<int, Node> keyMap; // key -> Node(value, freq)
+    unordered_map<int, list<int>> freqMap; // freq -> list of keys
+    unordered_map<int, list<int>::iterator> iterMap; // key -> position in freqMap list
+
+    void updateFreq(int key) {
+        int f = keyMap[key].freq;
+        
+        // Remove from current frequency list
+        freqMap[f].erase(iterMap[key]);
+        if (freqMap[f].empty()) {
+            freqMap.erase(f);
+            if (minFreq == f) minFreq++;
+        }
+
+        // Increment frequency and move to new list
+        keyMap[key].freq++;
+        f = keyMap[key].freq;
+        freqMap[f].push_front(key);
+        iterMap[key] = freqMap[f].begin();
+    }
+
+public:
+    LFUCache(int capacity) : cap(capacity), minFreq(0) {}
+
+    int get(int key) {
+        if (keyMap.find(key) == keyMap.end()) return -1;
+        updateFreq(key);
+        return keyMap[key].value;
+    }
+
+    void put(int key, int value) {
+        if (cap <= 0) return;
+
+        if (keyMap.find(key) != keyMap.end()) {
+            keyMap[key].value = value;
+            updateFreq(key);
+            return;
+        }
+
+        if (keyMap.size() >= cap) {
+            // Evict LRU key from the minFreq list
+            int keyToRemove = freqMap[minFreq].back();
+            freqMap[minFreq].pop_back();
+            if (freqMap[minFreq].empty()) freqMap.erase(minFreq);
+            
+            keyMap.erase(keyToRemove);
+            iterMap.erase(keyToRemove);
+        }
+
+        // Insert new key
+        keyMap[key] = {key, value, 1};
+        minFreq = 1;
+        freqMap[1].push_front(key);
+        iterMap[key] = freqMap[1].begin();
+    }
+};
