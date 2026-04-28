@@ -1,0 +1,35 @@
+#include <cmath>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+public:
+    int largestPalindrome(int n) {
+        if (n == 1) return 9; // Special case for single digits
+
+        int upper = pow(10, n) - 1;
+        int lower = pow(10, n - 1);
+
+        // We iterate downwards from the largest half-part to find the largest palindrome
+        for (int i = upper; i >= lower; i--) {
+            // Step 1: Construct the palindrome
+            string s = to_string(i);
+            string rs = s;
+            reverse(rs.begin(), rs.end());
+            long palindrome = stol(s + rs);
+
+            // Step 2: Check if this palindrome can be a product of two n-digit numbers
+            // We only need to check factors down to the square root of the palindrome
+            for (long j = upper; j * j >= palindrome; j--) {
+                if (palindrome % j == 0) {
+                    // Since j is an n-digit number and j*j >= palindrome, 
+                    // palindrome/j is also an n-digit number.
+                    return (int)(palindrome % 1337);
+                }
+            }
+        }
+        return -1;
+    }
+};
