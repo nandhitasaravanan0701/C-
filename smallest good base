@@ -1,0 +1,42 @@
+#include <string>
+#include <cmath>
+#include <iostream>
+
+using namespace std;
+
+class Solution {
+public:
+    string smallestGoodBase(string n_str) {
+        long long n = stoll(n_str);
+        
+        // m is the number of digits (all 1s). Max m is around 60 for n = 10^18.
+        for (int m = 60; m >= 2; m--) {
+            // Binary search for k such that k^(m-1) + ... + k^0 = n
+            // A good estimate for k is n^(1/(m-1))
+            long long k = pow(n, 1.0 / (m - 1));
+            
+            if (k > 1) {
+                long long sum = 0;
+                long long current_k = 1;
+                bool overflow = false;
+                
+                for (int i = 0; i < m; i++) {
+                    sum += current_k;
+                    if (i < m - 1) {
+                        // Check for overflow before multiplying
+                        if (n / k < current_k) {
+                            overflow = true;
+                            break;
+                        }
+                        current_k *= k;
+                    }
+                }
+                
+                if (!overflow && sum == n) return to_string(k);
+            }
+        }
+        
+        // The fallback is always n-1 (base where n = 11)
+        return to_string(n - 1);
+    }
+};
