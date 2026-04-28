@@ -1,0 +1,73 @@
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <list>
+
+using namespace std;
+
+class AllOne {
+    struct Node {
+        int count;
+        unordered_set<string> keys;
+    };
+
+    list<Node> nodeList; // Doubly linked list of counts
+    unordered_map<string, list<Node>::iterator> keyMap; // Key -> Node in list
+
+public:
+    AllOne() {}
+
+    void inc(string key) {
+        if (keyMap.find(key) == keyMap.end()) {
+            // If count 1 doesn't exist, insert it at the beginning
+            if (nodeList.empty() || nodeList.front().count != 1) {
+                nodeList.push_front({1, {key}});
+            } else {
+                nodeList.front().keys.insert(key);
+            }
+            keyMap[key] = nodeList.begin();
+        } else {
+            auto curr = keyMap[key];
+            auto next = std::next(curr);
+            
+            // Create next node if it doesn't exist or isn't curr->count + 1
+            if (next == nodeList.end() || next->count != curr->count + 1) {
+                next = nodeList.insert(next, {curr->count + 1, {}});
+            }
+            
+            next->keys.insert(key);
+            keyMap[key] = next;
+            
+            curr->keys.erase(key);
+            if (curr->keys.empty()) nodeList.erase(curr);
+        }
+    }
+
+    void dec(string key) {
+        auto curr = keyMap[key];
+        
+        if (curr->count == 1) {
+            keyMap.erase(key);
+        } else {
+            auto prev = std::prev(curr);
+            // Create prev node if it doesn't exist or isn't curr->count - 1
+            if (curr == nodeList.begin() || prev->count != curr->count - 1) {
+                prev = nodeList.insert(curr, {curr->count - 1, {}});
+            }
+            
+            prev->keys.insert(key);
+            keyMap[key] = prev;
+        }
+
+        curr->keys.erase(key);
+        if (curr->keys.empty()) nodeList.erase(curr);
+    }
+
+    string getMaxKey() {
+        return nodeList.empty() ? "" : *nodeList.back().keys.begin();
+    }
+
+    string getMinKey() {
+        return nodeList.empty() ? "" : *nodeList.front().keys.begin();
+    }
+};
