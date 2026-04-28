@@ -1,0 +1,56 @@
+#include <vector>
+#include <set>
+
+using namespace std;
+
+class Solution {
+    multiset<long> lower, upper;
+
+    void balance() {
+        if (lower.size() > upper.size() + 1) {
+            upper.insert(*lower.rbegin());
+            lower.erase(prev(lower.end()));
+        } else if (upper.size() > lower.size()) {
+            lower.insert(*upper.begin());
+            upper.erase(upper.begin());
+        }
+    }
+
+public:
+    vector<double> medianSlidingWindow(vector<int>& nums, int k) {
+        vector<double> result;
+        
+        for (int i = 0; i < nums.size(); i++) {
+            // 1. Add new element
+            if (lower.empty() || nums[i] <= *lower.rbegin()) {
+                lower.insert(nums[i]);
+            } else {
+                upper.insert(nums[i]);
+            }
+            balance();
+
+            // 2. Remove old element (once window is size k)
+            if (i >= k) {
+                int outNum = nums[i - k];
+                auto it = lower.find(outNum);
+                if (it != lower.end()) {
+                    lower.erase(it);
+                } else {
+                    upper.erase(upper.find(outNum));
+                }
+                balance();
+            }
+
+            // 3. Record median
+            if (i >= k - 1) {
+                if (k % 2 == 1) {
+                    result.push_back((double)*lower.rbegin());
+                } else {
+                    result.push_back(((double)*lower.rbegin() + (double)*upper.begin()) / 2.0);
+                }
+            }
+        }
+        
+        return result;
+    }
+};
