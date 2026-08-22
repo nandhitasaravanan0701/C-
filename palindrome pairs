@@ -1,0 +1,62 @@
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+private:
+    // Helper function to check if a substring is a palindrome
+    bool isPalindrome(const string& s, int left, int right) {
+        while (left < right) {
+            if (s[left++] != s[right--]) return false;
+        }
+        return true;
+    }
+
+public:
+    vector<vector<int>> palindromePairs(vector<string>& words) {
+        vector<vector<int>> pairs;
+        unordered_map<string, int> wordMap;
+        
+        // Step 1: Map the reverse of each word to its original index
+        for (int i = 0; i < words.size(); ++i) {
+            string rev = words[i];
+            reverse(rev.begin(), rev.end());
+            wordMap[rev] = i;
+        }
+        
+        // Step 2: Analyze each word by breaking it into prefix and suffix
+        for (int i = 0; i < words.size(); ++i) {
+            string word = words[i];
+            int n = word.length();
+            
+            // Loop goes up to n to handle the empty suffix case
+            for (int j = 0; j <= n; ++j) {
+                // Case A: The prefix word[0...j-1] is a palindrome
+                // If the reverse of the suffix word[j...n-1] exists in the map, 
+                // then map[suffix] + word forms a palindrome.
+                if (isPalindrome(word, 0, j - 1)) {
+                    string suffix = word.substr(j);
+                    if (wordMap.count(suffix) && wordMap[suffix] != i) {
+                        pairs.push_back({wordMap[suffix], i});
+                    }
+                }
+                
+                // Case B: The suffix word[j...n-1] is a palindrome
+                // If the reverse of the prefix word[0...j-1] exists in the map,
+                // then word + map[prefix] forms a palindrome.
+                // Note: j < n prevents duplicate pairs when the suffix is empty (already covered above).
+                if (j < n && isPalindrome(word, j, n - 1)) {
+                    string prefix = word.substr(0, j);
+                    if (wordMap.count(prefix) && wordMap[prefix] != i) {
+                        pairs.push_back({i, wordMap[prefix]});
+                    }
+                }
+            }
+        }
+        
+        return pairs;
+    }
+};
